@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-// The 6 "why are you stuck" options
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 const STUCK_OPTIONS = [
   "TLE",
   "MLE",
@@ -14,44 +15,34 @@ function AddProblemModal({ onClose, onSave }) {
   const [link, setLink] = useState("");
   const [title, setTitle] = useState("");
   const [level, setLevel] = useState("");
-  const [tags,settags]=useState([]);
-  const [selectedReasons, setSelectedReasons] = useState([]); // can pick multiple
+  const [tags, settags] = useState([]);
+  const [selectedReasons, setSelectedReasons] = useState([]);
   const [notes, setNotes] = useState("");
-  const [isFetching, setIsFetching] = useState(false);
 
-  // When user pastes a link, auto-fill title from backend (optional)
   const handleLinkChange = async (e) => {
     const value = e.target.value;
     setLink(value);
     try {
-      const token=localStorage.getItem("mytoken");
-      const response=await fetch("http://localhost:8000/user/addproblem/extracturl",{
-         method:"POST",
-         headers:{
-           "content-type":"application/json",
-           Authorization: `Bearer ${token}`,
-         },
-         body:
-             JSON.stringify({
-              url:value,
-             })
-         
-      })
-      if(response.ok){
-        const data=await response.json();
+      const token = localStorage.getItem("mytoken");
+      const response = await fetch(`${BASE_URL}/user/addproblem/extracturl`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ url: value }),
+      });
+      if (response.ok) {
+        const data = await response.json();
         if (data.title) setTitle(data.title);
-      if (data.difficulty) setLevel(data.difficulty);
-      if(data.tags) settags(data.tags);
+        if (data.difficulty) setLevel(data.difficulty);
+        if (data.tags) settags(data.tags);
       }
-      console.log(tags);
     } catch (error) {
       console.log(error.message);
     }
-    // If you want to auto-fetch title from your backend later, do it here
-    // For now we just set the link
   };
 
-  // Toggle a reason on/off
   const toggleReason = (reason) => {
     if (selectedReasons.includes(reason)) {
       setSelectedReasons(selectedReasons.filter((r) => r !== reason));
@@ -63,15 +54,15 @@ function AddProblemModal({ onClose, onSave }) {
   const handleSave = async () => {
     try {
       const token = localStorage.getItem("mytoken");
-      const response = await fetch("http://localhost:8000/user/addproblem/addproblem", {
+      const response = await fetch(`${BASE_URL}/user/addproblem/addproblem`, {
         method: "POST",
         headers: {
           "content-type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({  
+        body: JSON.stringify({
           link,
-         logs: selectedReasons,
+          logs: selectedReasons,
           description: notes,
           level,
           title,
@@ -89,13 +80,9 @@ function AddProblemModal({ onClose, onSave }) {
   };
 
   return (
-    // Dark overlay — click outside to close
     <div style={styles.overlay} onClick={onClose}>
-
-      {/* Modal box */}
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
 
-        {/* Header */}
         <div style={styles.header}>
           <div>
             <div style={styles.heading}>Log New Struggle</div>
@@ -104,7 +91,6 @@ function AddProblemModal({ onClose, onSave }) {
           <span style={styles.closeBtn} onClick={onClose}>✕</span>
         </div>
 
-        {/* URL Input */}
         <input
           style={styles.urlInput}
           placeholder="Paste LeetCode/Codeforces URL here..."
@@ -113,7 +99,6 @@ function AddProblemModal({ onClose, onSave }) {
         />
         <div style={styles.urlHint}>(e.g., https://leetcode.com/problems/two-sum/)</div>
 
-        {/* Problem Details */}
         <div style={styles.sectionTitle}>Problem Details</div>
         <div style={styles.row}>
           <div style={styles.field}>
@@ -136,7 +121,6 @@ function AddProblemModal({ onClose, onSave }) {
           </div>
         </div>
 
-        {/* Why are you stuck */}
         <div style={styles.sectionTitle}>Why are you stuck? <span style={styles.hint}>(click one or more)</span></div>
         <div style={styles.optionsGrid}>
           {STUCK_OPTIONS.map((reason) => (
@@ -154,7 +138,6 @@ function AddProblemModal({ onClose, onSave }) {
           ))}
         </div>
 
-        {/* Notes */}
         <div style={styles.sectionTitle}>Notes <span style={styles.hint}>(optional)</span></div>
         <textarea
           style={styles.textarea}
@@ -162,7 +145,6 @@ function AddProblemModal({ onClose, onSave }) {
           onChange={(e) => setNotes(e.target.value)}
         />
 
-        {/* Footer */}
         <div style={styles.footer}>
           <button style={styles.cancelBtn} onClick={onClose}>Cancel</button>
           <button style={styles.saveBtn} onClick={handleSave}>Save Struggle</button>
@@ -202,21 +184,9 @@ const styles = {
     alignItems: "flex-start",
     marginBottom: "18px",
   },
-  heading: {
-    fontSize: "20px",
-    fontWeight: "700",
-    color: "#1a1a2e",
-  },
-  subheading: {
-    fontSize: "13px",
-    color: "#888",
-    marginTop: "4px",
-  },
-  closeBtn: {
-    cursor: "pointer",
-    fontSize: "18px",
-    color: "#888",
-  },
+  heading: { fontSize: "20px", fontWeight: "700", color: "#1a1a2e" },
+  subheading: { fontSize: "13px", color: "#888", marginTop: "4px" },
+  closeBtn: { cursor: "pointer", fontSize: "18px", color: "#888" },
   urlInput: {
     width: "100%",
     padding: "11px 14px",
@@ -228,35 +198,12 @@ const styles = {
     color: "#1a1a2e",
     marginBottom: "6px",
   },
-  urlHint: {
-    fontSize: "11px",
-    color: "#aaa",
-    marginBottom: "18px",
-  },
-  sectionTitle: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#1a1a2e",
-    marginBottom: "10px",
-  },
-  hint: {
-    fontSize: "12px",
-    fontWeight: "400",
-    color: "#aaa",
-  },
-  row: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "12px",
-    marginBottom: "18px",
-  },
+  urlHint: { fontSize: "11px", color: "#aaa", marginBottom: "18px" },
+  sectionTitle: { fontSize: "14px", fontWeight: "600", color: "#1a1a2e", marginBottom: "10px" },
+  hint: { fontSize: "12px", fontWeight: "400", color: "#aaa" },
+  row: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "18px" },
   field: {},
-  label: {
-    fontSize: "12px",
-    color: "#888",
-    display: "block",
-    marginBottom: "5px",
-  },
+  label: { fontSize: "12px", color: "#888", display: "block", marginBottom: "5px" },
   input: {
     width: "100%",
     padding: "10px 14px",
@@ -268,12 +215,7 @@ const styles = {
     color: "#1a1a2e",
     background: "#f9f9f9",
   },
-  optionsGrid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "10px",
-    marginBottom: "18px",
-  },
+  optionsGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "18px" },
   optionBtn: {
     padding: "12px 16px",
     borderRadius: "10px",
@@ -285,14 +227,8 @@ const styles = {
     cursor: "pointer",
     textAlign: "center",
   },
-  optionBtnActive: {
-    background: "#f0edff",
-    border: "1px solid #6C5CE7",
-    color: "#6C5CE7",
-  },
-  tick: {
-    fontWeight: "700",
-  },
+  optionBtnActive: { background: "#f0edff", border: "1px solid #6C5CE7", color: "#6C5CE7" },
+  tick: { fontWeight: "700" },
   textarea: {
     width: "100%",
     padding: "11px 14px",
@@ -307,11 +243,7 @@ const styles = {
     marginBottom: "20px",
     fontFamily: "'Segoe UI', sans-serif",
   },
-  footer: {
-    display: "flex",
-    justifyContent: "flex-end",
-    gap: "10px",
-  },
+  footer: { display: "flex", justifyContent: "flex-end", gap: "10px" },
   cancelBtn: {
     padding: "10px 22px",
     borderRadius: "8px",

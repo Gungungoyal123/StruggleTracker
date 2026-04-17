@@ -1,31 +1,34 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-const [toast, setToast] = useState(null);
+  const [toast, setToast] = useState(null);
 
-const showToast = (msg) => {
-  setToast(msg);
-  setTimeout(() => setToast(null), 3000);
-};
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:8000/user/login", {
+      const response = await fetch(`${BASE_URL}/user/login`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
-     if (response.ok) {
-  localStorage.setItem("mytoken", data.token);
-  navigate("/dashboard");
-} else {
-  showToast(data.message);
-}
+      if (response.ok) {
+        localStorage.setItem("mytoken", data.token);
+        navigate("/dashboard");
+      } else {
+        showToast(data.message);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -62,19 +65,20 @@ const showToast = (msg) => {
         <span>📈 Track Daily Progress</span>
         <span>🏆 Celebrate Wins</span>
       </div>
+
       {toast && (
-  <div style={{
-    position: "fixed", bottom: "28px", right: "28px",
-    background: "linear-gradient(135deg, #ff416c, #ff4b2b)",
-    color: "white", padding: "14px 20px", borderRadius: "14px",
-    fontSize: "14px", fontWeight: "500",
-    boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
-    display: "flex", alignItems: "center", gap: "10px", maxWidth: "280px",
-  }}>
-    <span style={{ fontSize: "18px" }}>❌</span>
-    {toast}
-  </div>
-)}
+        <div style={{
+          position: "fixed", bottom: "28px", right: "28px",
+          background: "linear-gradient(135deg, #ff416c, #ff4b2b)",
+          color: "white", padding: "14px 20px", borderRadius: "14px",
+          fontSize: "14px", fontWeight: "500",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+          display: "flex", alignItems: "center", gap: "10px", maxWidth: "280px",
+        }}>
+          <span style={{ fontSize: "18px" }}>❌</span>
+          {toast}
+        </div>
+      )}
     </div>
   );
 }

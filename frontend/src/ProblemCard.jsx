@@ -1,12 +1,14 @@
 import { useState } from "react";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 function ProblemCard({ problem, onUpdate }) {
   const [masteryLevel, setMasteryLevel] = useState(problem.masteryLevel);
 
   const markasmastered = async () => {
     try {
       const token = localStorage.getItem("mytoken");
-      await fetch(`http://localhost:8000/user/markasmastered/${problem._id}`, {
+      await fetch(`${BASE_URL}/user/markasmastered/${problem._id}`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -15,12 +17,12 @@ function ProblemCard({ problem, onUpdate }) {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   const deleteproblem = async () => {
     try {
       const token = localStorage.getItem("mytoken");
-      await fetch(`http://localhost:8000/user/deleteproblem/${problem._id}`, {
+      await fetch(`${BASE_URL}/user/deleteproblem/${problem._id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -28,12 +30,12 @@ function ProblemCard({ problem, onUpdate }) {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   const markasstruggling = async () => {
     try {
       const token = localStorage.getItem("mytoken");
-      await fetch(`http://localhost:8000/user/markasstruggling/${problem._id}`, {
+      await fetch(`${BASE_URL}/user/markasstruggling/${problem._id}`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -42,7 +44,7 @@ function ProblemCard({ problem, onUpdate }) {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   return (
     <div style={styles.card}>

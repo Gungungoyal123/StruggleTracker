@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 function Reset() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -14,17 +16,17 @@ function Reset() {
   const handleReset = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:8000/user/reset", {
+      const response = await fetch(`${BASE_URL}/user/reset`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email }),
       });
       const data = await response.json();
-     if (data.success) {
-  navigate("/otppage", { state: { email: email } });  // just navigate, no toast
-} else {
-  showToast(data.message, "error");  // only show red on failure
-}
+      if (data.success) {
+        navigate("/otppage", { state: { email: email } });
+      } else {
+        showToast(data.message, "error");
+      }
     } catch (error) {
       console.log(error);
     }

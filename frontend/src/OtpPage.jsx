@@ -1,39 +1,44 @@
 import { useState } from "react";
-import { useNavigate ,useLocation} from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 function OtpPage() {
   const navigate = useNavigate();
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const location=useLocation();
+  const location = useLocation();
   const [toast, setToast] = useState(null);
 
-const showToast = (msg) => {
-  setToast(msg);
-  setTimeout(() => setToast(null), 3000);
-};
-const email=location.state?.email;
-  const handleotp= async (e) => {
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const email = location.state?.email;
+
+  const handleotp = async (e) => {
     e.preventDefault();
-    const datato={
-      email:email,
-      otp:otp.join("")
-    }
+    const datato = {
+      email: email,
+      otp: otp.join("")
+    };
     try {
-      const response = await fetch("http://localhost:8000/user/reset/verify", {
+      const response = await fetch(`${BASE_URL}/user/reset/verify`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(datato),
       });
       const data = await response.json();
-     if (data.success) {
-  navigate("/newpassword", { state: { email: email } });
-} else {
-  showToast(data.message);
-}
+      if (data.success) {
+        navigate("/newpassword", { state: { email: email } });
+      } else {
+        showToast(data.message);
+      }
     } catch (error) {
       console.log(error);
     }
   };
+
   const handleChange = (value, index) => {
     if (!/^\d*$/.test(value)) return;
     const newOtp = [...otp];
@@ -93,19 +98,20 @@ const email=location.state?.email;
         <span>📈 Track Daily Progress</span>
         <span>🏆 Celebrate Wins</span>
       </div>
+
       {toast && (
-  <div style={{
-    position: "fixed", bottom: "28px", right: "28px",
-    background: "linear-gradient(135deg, #ff416c, #ff4b2b)",
-    color: "white", padding: "14px 20px", borderRadius: "14px",
-    fontSize: "14px", fontWeight: "500",
-    boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
-    display: "flex", alignItems: "center", gap: "10px", maxWidth: "280px",
-  }}>
-    <span style={{ fontSize: "18px" }}>❌</span>
-    {toast}
-  </div>
-)}
+        <div style={{
+          position: "fixed", bottom: "28px", right: "28px",
+          background: "linear-gradient(135deg, #ff416c, #ff4b2b)",
+          color: "white", padding: "14px 20px", borderRadius: "14px",
+          fontSize: "14px", fontWeight: "500",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+          display: "flex", alignItems: "center", gap: "10px", maxWidth: "280px",
+        }}>
+          <span style={{ fontSize: "18px" }}>❌</span>
+          {toast}
+        </div>
+      )}
     </div>
   );
 }
